@@ -1,0 +1,47 @@
+
+// ==========================================
+// TESTBENCH: PS/2 Keyboard Receiver
+// ==========================================
+`timescale 1ns/1ps
+module tb_ps2_keyboard;
+    reg clk, rst_n, ps2_clk, ps2_data;
+    wire [7:0] scan_code;
+    wire rx_done;
+
+    ps2_keyboard_rx uut (.clk(clk), .rst_n(rst_n), .ps2_clk(ps2_clk), 
+                         .ps2_data(ps2_data), .scan_code(scan_code), .rx_done(rx_done));
+
+    // FPGA System clock (100 MHz)
+    always #5 clk = ~clk;
+
+    // Task to simulate sending 1 byte over PS/2
+    task send_ps2_byte(input [7:0] data);
+        integer i;
+        begin
+            // Start bit (0)
+            ps2_data = 0; #20000; ps2_clk = 0; #20000; ps2_clk = 1;
+            // 8 Data bits (LSB first)
+            for (i = 0; i < 8; i = i + 1) begin
+                ps2_data = data[i]; #20000; ps2_clk = 0; #20000; ps2_clk = 1;
+            end
+            // Parity bit (simulated as 0 here)
+            ps2_data = 0; #20000; ps2_clk = 0; #20000; ps2_clk = 1;
+            // Stop bit (1)
+            ps2_data = 1; #20000; ps2_clk = 0; #20000; ps2_clk = 1;
+        end
+    endtask
+
+    initial begin
+        clk = 0; rst_n = 0; ps2_clk = 1; ps2_data = 1;
+        
+        $monitor("Time=%0t | scan_code=%h | rx_done=%b", $time, scan_code, rx_done);
+
+        #100 rst_n = 1;
+        
+        // Simulate pressing 'A' key (Scan code 1C)
+        #1000;
+        send_ps2_byte(8'h1C);
+        
+        #50000 $finish;
+    end
+endmodule
