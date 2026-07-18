@@ -1,0 +1,25 @@
+// ==========================================
+// TESTBENCH
+// ==========================================
+`timescale 1ns/1ps
+module tb_mux_4to1;
+    reg [31:0] a, b, c, d;
+    reg [1:0] sel;
+    wire [31:0] y;
+
+    mux_4to1_32bit uut (.a(a), .b(b), .c(c), .d(d), .sel(sel), .y(y));
+
+    initial begin
+        $monitor("Time=%0t | sel=%b | y=%0d", $time, sel, y);
+        
+        // Give inputs some values
+        a = 32'd10; b = 32'd20; c = 32'd30; d = 32'd40;
+        
+        sel = 2'b00; #10; // Should output 10
+        sel = 2'b01; #10; // Should output 20
+        sel = 2'b10; #10; // Should output 30
+        sel = 2'b11; #10; // Should output 40
+        
+        $finish;
+    end
+endmodule

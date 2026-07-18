@@ -1,0 +1,26 @@
+// ==========================================
+// TESTBENCH
+// ==========================================
+`timescale 1ns/1ps
+module tb_pipelined_mult;
+    reg clk;
+    reg [31:0] a, b;
+    wire [63:0] p;
+
+    pipelined_mult_32bit uut (.clk(clk), .a(a), .b(b), .p(p));
+
+    always #5 clk = ~clk;
+
+    initial begin
+        clk = 0; a = 0; b = 0;
+        
+        $monitor("Time=%0t | a=%0d | b=%0d | p=%0d", $time, a, b, p);
+        
+        // Wait for a few clocks, then apply inputs
+        #10 a = 32'd5; b = 32'd10;
+        #10 a = 32'd15; b = 32'd2;
+        
+        // Pipeline latency check: Output for 5*10 aayega 3 clock cycles baad
+        #40 $finish;
+    end
+endmodule

@@ -1,0 +1,20 @@
+// ==========================================
+// RTL: D Flip-Flop with Asynchronous Reset
+// ==========================================
+module dff_async (
+    input wire clk, 
+    input wire rst_n,  // Active-low reset
+    input wire d,
+    output reg q
+);
+
+    // Asynchronous reset ke liye 'negedge rst_n' sensitivity list mein hona zaroori hai
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            q <= 1'b0;
+        end else begin
+            q <= d;
+        end
+    end
+
+endmodule

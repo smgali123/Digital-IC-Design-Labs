@@ -1,0 +1,48 @@
+// ==========================================
+// RTL: Registered 32-bit ALU
+// ==========================================
+module alu_registered (
+    input wire clk,
+    input wire rst_n,
+    input wire [31:0] a_in, b_in,
+    input wire [2:0] op_in,
+    output reg [31:0] result_out
+);
+
+    // Internal Registers for Input
+    reg [31:0] a_reg, b_reg;
+    reg [2:0] op_reg;
+    
+    // Internal Wire/Reg for Combinational Output
+    reg [31:0] alu_comb_out;
+
+    // 1. Sequential Block: Register Inputs
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            a_reg <= 32'd0; b_reg <= 32'd0; op_reg <= 3'd0;
+        end else begin
+            a_reg <= a_in; b_reg <= b_in; op_reg <= op_in;
+        end
+    end
+
+    // 2. Combinational Block: ALU Logic (Using blocking assignments)
+    always @(*) begin
+        case (op_reg)
+            3'b000: alu_comb_out = a_reg + b_reg; // ADD
+            3'b001: alu_comb_out = a_reg - b_reg; // SUB
+            3'b010: alu_comb_out = a_reg & b_reg; // AND
+            3'b011: alu_comb_out = a_reg | b_reg; // OR
+            default: alu_comb_out = 32'd0;
+        endcase
+    end
+
+    // 3. Sequential Block: Register Output
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            result_out <= 32'd0;
+        end else begin
+            result_out <= alu_comb_out;
+        end
+    end
+
+endmodule
